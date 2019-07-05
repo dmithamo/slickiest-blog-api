@@ -1,5 +1,9 @@
 import { MongoClient } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import dotenv from 'dotenv';
+
+// read env vars
+dotenv.config();
+const { DATABASE_URL } = process.env;
 
 let database;
 
@@ -8,8 +12,7 @@ let database;
  * @returns {void}
  */
 export const startDatabase = async () => {
-  const mongo = new MongoMemoryServer();
-  const mongoDBURL = await mongo.getConnectionString();
+  const mongoDBURL = DATABASE_URL;
   const connection = await MongoClient.connect(mongoDBURL, {
     useNewUrlParser: true,
   });

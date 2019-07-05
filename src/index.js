@@ -1,11 +1,11 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import helmet from 'helmet';
 import morgan from 'morgan';
+import dotenv from 'dotenv';
 
 // db
-import { startDatabase } from './database/mongo';
+import { getDatabase } from './database/mongo';
 import {
   getStories,
   getStoryByID,
@@ -14,20 +14,20 @@ import {
   deleteStory,
 } from './database/stories';
 
+// read env variables
+dotenv.config();
+const { PORT, ROOT_API_URL } = process.env;
+
 const app = express();
-const PORT = 3000;
-const ROOT_API_URL = '/api/v1';
 
 // Attach middleware
 
-//  parse request body into JSON
+// Parse request body if sent as JSON or encoded in url
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // enable cross-origin resource sharing
 app.use(cors());
-
-// secure the API
-app.use(helmet());
 
 // use morgan to log requests
 app.use(morgan('dev'));
@@ -89,11 +89,11 @@ app.delete(`${ROOT_API_URL}/:id`, async (req, res) => {
 });
 
 // Start db and listen for requests
-startDatabase()
+getDatabase()
   .then(async () => {
     app.listen(PORT, () => {
       // eslint-disable-next-line no-console
-      console.log(`Listening on port ${PORT}...`);
+      console.log(`Express server running on port ${PORT}...`);
     });
   })
   .catch((e) => {
