@@ -4,6 +4,16 @@
 
 #### How should this be manually tested?
 
+1. Run the following commands in Terminal
+
+```bash
+git clone git@github.com:dmithamo/slickiest-blog-api.git
+cd slickiest-blog-api
+git checkout ch-set-up-a-database
+yarn
+yarn start:dev || yarn start:prod
+```
+
 #### What are the relevant Trello Cards?
 
 #### Screenshots (if appropriate)
