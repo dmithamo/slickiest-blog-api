@@ -12,11 +12,16 @@ let database;
  * @returns {void}
  */
 export const startDatabase = async () => {
-  const mongoDBURL = DATABASE_URL;
-  const connection = await MongoClient.connect(mongoDBURL, {
-    useNewUrlParser: true,
-  });
-  database = connection.db();
+  await MongoClient.connect(
+    DATABASE_URL,
+    {
+      useNewUrlParser: true,
+    },
+    (err, conn) => {
+      if (err) throw err;
+      database = conn.db();
+    },
+  );
 };
 
 /**

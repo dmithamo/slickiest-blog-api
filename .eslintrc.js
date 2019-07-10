@@ -15,5 +15,8 @@ module.exports = {
   },
   rules: {
     'no-unused-expressions': ['error', { allowTernary: true }],
+    'object-curly-newline': 0,
+    'no-underscore-dangle': 0,
+    'consistent-return': 0,
   },
 };

@@ -1,5 +1,5 @@
 {
   "exec": "yarn start:dev",
-  "watch": ["src/*", "package.json", "nodemon.json", ".prettierrc"],
+  "watch": ["src/*"],
   "ext": "js"
 }

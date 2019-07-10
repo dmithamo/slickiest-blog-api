@@ -1,5 +1,5 @@
-import { ObjectID } from 'mongodb';
-import { getDatabase } from './mongo';
+// Reusable db fns
+import { get, getByID, insert, update, deleteItem } from './_common';
 
 const collectionName = 'stories';
 
@@ -8,24 +8,18 @@ const collectionName = 'stories';
  * @returns {Array} stories - array of all stories in the db
  */
 export const getStories = async () => {
-  const database = await getDatabase();
-  const stories = await database
-    .collection(collectionName)
-    .find({})
-    .toArray();
+  const stories = await get(collectionName);
   return stories;
 };
 
 /**
  * @description Retrieve a story from the db given its id
  * @param {String} id - the id of the story of interest
- * @returns {Array} stories - array of all stories in the db
+ * @returns {Object} item - item with matching id
+ * from the collection
  */
 export const getStoryByID = async (id) => {
-  const database = await getDatabase();
-  const story = await database
-    .collection(collectionName)
-    .findOne({ _id: new ObjectID(id) });
+  const story = await getByID(id, collectionName);
   return story;
 };
 
@@ -35,10 +29,7 @@ export const getStoryByID = async (id) => {
  * @returns {object} insertedStory - story that was saved to the db
  */
 export const insertStory = async (story) => {
-  const database = await getDatabase();
-  const insertedStory = await database
-    .collection(collectionName)
-    .insertOne(story);
+  const insertedStory = await insert(story, collectionName);
   return insertedStory;
 };
 
@@ -49,11 +40,7 @@ export const insertStory = async (story) => {
  * @returns {object} updatedStory - story after updates
  */
 export const updateStory = async (storyID, storyUpdates) => {
-  const database = await getDatabase();
-  const objID = new ObjectID(storyID);
-  const updatedStory = await database
-    .collection(collectionName)
-    .updateOne({ _id: objID }, { $set: { ...storyUpdates } });
+  const updatedStory = await update(storyID, storyUpdates, collectionName);
   return updatedStory;
 };
 
@@ -63,7 +50,5 @@ export const updateStory = async (storyID, storyUpdates) => {
  * @returns {void}
  */
 export const deleteStory = async (storyID) => {
-  const database = await getDatabase();
-  const objID = new ObjectID(storyID);
-  await database.collection(collectionName).deleteOne({ _id: objID });
+  await deleteItem(storyID, collectionName);
 };
