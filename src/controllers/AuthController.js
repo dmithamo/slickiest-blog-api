@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 
+// middleware
+import validateAuthInput from '../middleware/validators/validateAuthInput';
+
 // db
 import { insertUser, getUserByEmail } from '../database/users';
 
@@ -12,31 +15,6 @@ dotenv.config();
 const { SECRET } = process.env;
 
 const router = Router();
-
-// POST request - register user, generate auth token
-router.post('/register', async (req, res) => {
-  try {
-    const { password } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 8);
-    const { ops } = await insertUser({
-      ...req.body,
-      password: hashedPassword,
-    });
-
-    const newUser = ops[0];
-    const token = jwt.sign({ id: newUser._id, email: newUser.email }, SECRET, {
-      expiresIn: 86400,
-    });
-
-    await delete newUser.password;
-    return res.status(201).send({
-      msg: 'Success',
-      data: { ...newUser, token },
-    });
-  } catch (e) {
-    return res.status(500).send({ error: `Server error. ${e}` });
-  }
-});
 
 // POST request - login a user, generate auth token
 router.post('/login', async (req, res) => {
@@ -59,7 +37,35 @@ router.post('/login', async (req, res) => {
     });
 
     await delete user.password;
-    return res.status(201).send({ msg: 'Success', user: { ...user, token } });
+    return res.status(200).send({ msg: 'Success', user: { ...user, token } });
+  } catch (e) {
+    return res.status(500).send({ error: `Server error. ${e}` });
+  }
+});
+
+// Validate all subsequents
+router.use(validateAuthInput);
+
+// POST request - register user, generate auth token
+router.post('/register', async (req, res) => {
+  try {
+    const { password } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 8);
+    const { ops } = await insertUser({
+      ...req.body,
+      password: hashedPassword,
+    });
+
+    const newUser = ops[0];
+    const token = jwt.sign({ id: newUser._id, email: newUser.email }, SECRET, {
+      expiresIn: 86400,
+    });
+
+    await delete newUser.password;
+    return res.status(201).send({
+      msg: 'Success',
+      data: { ...newUser, token },
+    });
   } catch (e) {
     return res.status(500).send({ error: `Server error. ${e}` });
   }

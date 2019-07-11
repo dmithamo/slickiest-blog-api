@@ -5,6 +5,14 @@ dotenv.config();
 
 const { SECRET } = process.env;
 
+/**
+ * @description Verify that a token exists for all protected routes
+ * @param {Object} req request object
+ * @param {Object} req response object
+ * @param {Function} next the next fn in the middleware
+ *
+ * @returns {void} ...not sure here
+ */
 const verifyAuthToken = (req, res, next) => {
   try {
     const { authorization: token } = req.headers;
