@@ -1,6 +1,9 @@
 /* eslint-disable indent */
 import { Router } from 'express';
+import he from 'he';
+import slug from 'slug';
 import verifyAuthToken from '../middleware/verifyAuthToken';
+import validateStoryInput from '../middleware/validators/validateStoryInput';
 
 import {
   getStories,
@@ -44,13 +47,37 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// DELETE request
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const story = await getStoryByID(id);
+    if (story) {
+      await deleteStory(id);
+      return res.status(204).send();
+    }
+
+    return res.status(404).send({ msg: `No story found with id ${id}` });
+  } catch (e) {
+    return res.status(500).send({ error: `Server error. ${e}` });
+  }
+});
+
+// Validate all subsequent routes
+router.use(validateStoryInput);
+
 // POST request
 router.post('/', async (req, res) => {
+  const { title, body, tags } = req.body;
   try {
     const { ops: newStory } = await insertStory({
-      ...req.body,
-      author: req.user,
+      slug: slug(title, { lower: true }),
+      title,
+      body: he.encode(body),
       publishedOn: new Date().toISOString(),
+      updatedOn: new Date().toISOString(),
+      author: req.user,
+      tags: tags || '',
     });
 
     return res.status(201).send({
@@ -71,27 +98,14 @@ router.put('/:id', async (req, res) => {
     const story = await getStoryByID(id);
 
     if (story) {
-      await updateStory(id, storyUpdates);
+      await updateStory(id, {
+        ...storyUpdates,
+        updatedOn: new Date().toISOString(),
+      });
       // This may be an unnecessary revisit to the db...
       const updatedStory = await getStoryByID(id);
 
       return res.status(201).send({ msg: 'Success', data: updatedStory });
-    }
-
-    return res.status(404).send({ msg: `No story found with id ${id}` });
-  } catch (e) {
-    return res.status(500).send({ error: `Server error. ${e}` });
-  }
-});
-
-// DELETE request
-router.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const story = await getStoryByID(id);
-    if (story) {
-      await deleteStory(id);
-      return res.status(204).send();
     }
 
     return res.status(404).send({ msg: `No story found with id ${id}` });

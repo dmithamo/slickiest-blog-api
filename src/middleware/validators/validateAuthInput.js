@@ -89,7 +89,7 @@ const validateAuthInput = async (req, res, next) => {
   ];
 
   if (errors.length > 0) {
-    return res.status(400).send({ errors });
+    return res.status(400).send({ msg: 'Bad request', errors });
   }
   next();
 };
